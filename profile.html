@@ -1,0 +1,240 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>User Settings Page</title>
+    <link rel="stylesheet" href="style.css" />
+    <link rel="stylesheet" href="fontawesome/css/all.css" />
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="script.js" defer></script>
+    <style>
+      /* CSS for center-aligning token display */
+      .token-display {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        height: 100px; /* Adjust height as needed */
+        border: 1px solid #ccc; /* Example border for clarity */
+        margin-top: 20px; /* Adjust spacing as needed */
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <div class="leftbox">
+        <nav>
+          <a onclick="tabs(0)" class="tab active">
+            <img
+              src="https://img.icons8.com/?size=50&id=23264&format=png&color=000000"
+              alt="Custom Tab Icon"
+              style="width: 30px; height: 30px"
+            />
+          </a>
+          <a onclick="tabs(1)" class="tab">
+            <img
+              src="https://img.icons8.com/?size=50&id=53373&format=png&color=000000"
+              alt="Custom Tab Icon"
+              style="width: 30px; height: 30px"
+            />
+          </a>
+          <a onclick="tabs(2)" class="tab">
+            <img
+              src="https://img.icons8.com/?size=50&id=EPPPtsN88vTz&format=png&color=000000"
+              alt="Custom Tab Icon"
+              style="width: 30px; height: 30px"
+            />
+          </a>
+        </nav>
+      </div>
+      <div class="rightbox">
+        <div class="profile tabShow">
+          <h1>Personal Info</h1>
+          <div class="profile-picture-container">
+            <img id="image" class="profile-picture" alt="Profile Image" />
+            <div class="edit-profile-picture">
+              <label for="profilePicture" class="edit-profile-label">
+                <i class="fas fa-camera"></i> Change Profile Picture
+              </label>
+              <input
+                type="file"
+                id="profilePicture"
+                accept="image/*"
+                onchange="previewImage(event)"
+              />
+            </div>
+          </div>
+          <form id="personalInfoForm">
+            <label for="id">Profile ID</label>
+            <input type="text" class="input" id="id" readonly />
+
+            <label for="name">Full Name</label>
+            <input type="text" class="input" id="name" />
+
+            <label for="birthday">Birthday</label>
+            <input type="text" class="input" id="birthday" />
+
+            <label for="gender">Gender</label>
+            <input type="text" class="input" id="gender" />
+
+            <label for="email">Email Address</label>
+            <input type="text" class="input" id="email" />
+
+            <label for="password">Password</label>
+            <input type="password" class="input" id="password" />
+
+            <button type="button" onclick="updateProfile()" class="btn">
+              Update
+            </button>
+          </form>
+        </div>
+        <div class="organization tabHide">
+          <h1>Company Info</h1>
+          <form id="companyInfoForm">
+            <!-- Add these fields to your HTML form -->
+            <label for="orgName">Organization Name</label>
+            <input type="text" class="input" id="orgName" />
+
+            <label for="position">Position</label>
+            <input type="text" class="input" id="position" />
+
+            <button type="button" onclick="updateCompanyInfo()" class="btn">
+              Update
+            </button>
+          </form>
+        </div>
+        <div class="token tabHide">
+          <h1>Token</h1>
+          <button onclick="generateToken()" class="btn">Generate Token</button>
+          <button onclick="fetchToken()" class="btn">Fetch Token</button>
+          <div id="token-display" class="token-display"></div>
+          <!-- New div for token display -->
+          <button onclick="updateToken()" class="btn">Update Token</button>
+        </div>
+      </div>
+    </div>
+    <button onclick="signOut()" class="sign-out-btn">Sign Out</button>
+    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script>
+      async function fetchTokenFromDatabase(email) {
+        try {
+          const response = await fetch(
+            `http://localhost:3001/fetchToken/${email}`
+          );
+
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+
+          const tokenEntity = await response.json();
+          return tokenEntity.token;
+        } catch (error) {
+          console.error("Error fetching token from database:", error);
+          return null;
+        }
+      }
+
+      async function fetchCompanyInfoFromDatabase(email) {
+        try {
+          const response = await fetch(
+            `http://localhost:3001/fetchCompanyInfo/${email}`
+          );
+
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+
+          const companyInfo = await response.json();
+          return companyInfo;
+        } catch (error) {
+          console.error("Error fetching company info:", error);
+          return null;
+        }
+      }
+
+      function displayCompanyInfo() {
+        const email = document.getElementById("email").value; // Assuming email is input by the user
+        fetchCompanyInfoFromDatabase(email)
+          .then((companyInfo) => {
+            if (companyInfo) {
+              document.getElementById("orgName").value = companyInfo.orgName;
+              document.getElementById("position").value = companyInfo.position;
+              // Set other fields as needed
+              console.log("Company info fetched:", companyInfo);
+            } else {
+              console.log("Company info not found.");
+              document.getElementById("orgName").value = "";
+              document.getElementById("position").value = "";
+              // Clear other fields or set default values
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching company info:", error);
+            document.getElementById("orgName").value = "";
+            document.getElementById("position").value = "";
+            // Handle error scenario or display default values
+          });
+      }
+
+      function fetchToken() {
+        const email = document.getElementById("email").value; // Assuming email is input by the user
+        fetchTokenFromDatabase(email)
+          .then((token) => {
+            if (token) {
+              document.getElementById(
+                "token-display"
+              ).innerHTML = `<p><strong>Stored Token:</strong> ${token}</p>`;
+            } else {
+              document.getElementById("token-display").innerHTML =
+                "<p>No token found.</p>";
+            }
+          })
+          .catch((error) => {
+            console.error("Error fetching token:", error);
+            document.getElementById("token-display").innerHTML =
+              "<p>Error fetching token.</p>";
+          });
+      }
+
+      function previewImage(event) {
+        const input = event.target;
+        if (input.files && input.files[0]) {
+          const reader = new FileReader();
+
+          reader.onload = function (e) {
+            document.getElementById("image").src = e.target.result;
+          };
+
+          reader.readAsDataURL(input.files[0]);
+        }
+      }
+
+      function tabs(tabIndex) {
+        const tabs = document.querySelectorAll(".tab");
+        const tabShows = document.querySelectorAll(".tabShow, .tabHide");
+
+        tabs.forEach((tab, index) => {
+          if (index === tabIndex) {
+            tab.classList.add("active");
+          } else {
+            tab.classList.remove("active");
+          }
+        });
+
+        tabShows.forEach((tabShow, index) => {
+          if (index === tabIndex) {
+            tabShow.classList.remove("tabHide");
+            tabShow.classList.add("tabShow");
+            if (index === 1) {
+              // Check if the selected tab is Company Info
+              displayCompanyInfo(); // Call displayCompanyInfo function to fetch and display company info
+            }
+          } else {
+            tabShow.classList.remove("tabShow");
+            tabShow.classList.add("tabHide");
+          }
+        });
+      }
+    </script>
+  </body>
+</html>
