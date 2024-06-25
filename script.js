@@ -10,7 +10,7 @@ function signIn() {
 
   let params = {
     client_id:
-      ".apps.googleusercontent.com",
+      "tent.com",
     redirect_uri: "http://127.0.0.1:5501/profile.html",
     response_type: "token",
     scope:
@@ -296,33 +296,25 @@ function displayUserInfo(userInfo) {
 
 // Function to generate token using Spring Boot API
 async function generateToken() {
+  const tokenLength = 10;
+  let token = "";
+  const characters =
+    "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+
+  for (let i = 0; i < tokenLength; i++) {
+    const index = Math.floor(Math.random() * characters.length);
+    token += characters.charAt(index);
+  }
+
+  // Display the generated token
+  document.getElementById("token-display").innerHTML =
+    "<strong>Generated Token:</strong> " + token;
+
+  // Optionally, you can store the generated token in the database here
   try {
-    const authInfo = loadAuthInfo();
-    if (!authInfo) {
-      console.error("No auth information found.");
-      return;
-    }
-
-    const response = await fetch("http://localhost:9090/tokens/create", {
-      method: "POST",
-      headers: {
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({ email: userEmail }),
-    });
-
-    if (!response.ok) {
-      throw new Error("Network response was not ok");
-    }
-
-    const tokenEntity = await response.json();
-    document.getElementById("token-display").innerHTML =
-      "<strong>Generated Token:</strong> " + tokenEntity.token;
-
-    // Optionally, you can store the generated token in the database here
-    storeTokenInDatabase(tokenEntity.token, userEmail);
+    await storeTokenInDatabase(token, userEmail);
   } catch (error) {
-    console.error("Error generating token:", error);
+    console.error("Error storing token in the database:", error);
   }
 }
 
