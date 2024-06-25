@@ -10,7 +10,7 @@ function signIn() {
 
   let params = {
     client_id:
-      "174612712651-5rq4a1uco3ftc60t49jvvvpj4l8ikg5m.apps.googleusercontent.com",
+      ".apps.googleusercontent.com",
     redirect_uri: "http://127.0.0.1:5501/profile.html",
     response_type: "token",
     scope:
