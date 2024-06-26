@@ -6,8 +6,7 @@
     <title>User Settings Page</title>
     <link rel="stylesheet" href="style.css" />
     <link rel="stylesheet" href="fontawesome/css/all.css" />
-    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
-    <script src="script.js" defer></script>
+    <link rel="stylesheet" href="path/to/intl-tel-input/css/intlTelInput.css" />
     <style>
       /* CSS for center-aligning token display */
       .token-display {
@@ -80,6 +79,12 @@
             <label for="email">Email Address</label>
             <input type="text" class="input" id="email" />
 
+            <label for="Contact">Contact Number</label>
+            <input type="tel" id="Contact" placeholder="Contact" />
+
+            <!-- Hidden input for storing selected country code -->
+            <input type="hidden" id="countryCode" name="countryCode" />
+
             <label for="password">Password</label>
             <input type="password" class="input" id="password" />
 
@@ -91,7 +96,6 @@
         <div class="organization tabHide">
           <h1>Company Info</h1>
           <form id="companyInfoForm">
-            <!-- Add these fields to your HTML form -->
             <label for="orgName">Organization Name</label>
             <input type="text" class="input" id="orgName" />
 
@@ -108,24 +112,23 @@
           <button onclick="generateToken()" class="btn">Generate Token</button>
           <button onclick="fetchToken()" class="btn">Fetch Token</button>
           <div id="token-display" class="token-display"></div>
-          <!-- New div for token display -->
           <button onclick="updateToken()" class="btn">Update Token</button>
         </div>
       </div>
     </div>
     <button onclick="signOut()" class="sign-out-btn">Sign Out</button>
-    <script src="https://apis.google.com/js/platform.js" async defer></script>
+    <script src="https://cdn.jsdelivr.net/npm/moment@2.29.1/moment.min.js"></script>
+    <script src="script.js" defer></script>
+    <script src="path/to/intl-tel-input/js/intlTelInput.js"></script>
     <script>
       async function fetchTokenFromDatabase(email) {
         try {
           const response = await fetch(
             `http://localhost:3001/fetchToken/${email}`
           );
-
           if (!response.ok) {
             throw new Error("Network response was not ok");
           }
-
           const tokenEntity = await response.json();
           return tokenEntity.token;
         } catch (error) {
@@ -139,11 +142,9 @@
           const response = await fetch(
             `http://localhost:3001/fetchCompanyInfo/${email}`
           );
-
           if (!response.ok) {
             throw new Error("Network response was not ok");
           }
-
           const companyInfo = await response.json();
           return companyInfo;
         } catch (error) {
@@ -152,32 +153,97 @@
         }
       }
 
+      async function fetchCountryCodeFromDatabase(email) {
+        try {
+          const response = await fetch(
+            `http://localhost:3001/fetchCountryCode/${email}`
+          );
+          if (!response.ok) {
+            throw new Error("Network response was not ok");
+          }
+          const countryCodeData = await response.json();
+          return countryCodeData.countryCode;
+        } catch (error) {
+          console.error("Error fetching country code:", error);
+          return null;
+        }
+      }
+
+      function displayUserInfo(userInfo) {
+        document.getElementById("id").value = userInfo.id || "";
+        document.getElementById("name").value = userInfo.name || "";
+        document.getElementById("email").value = userInfo.email || "";
+        document.getElementById("gender").value = userInfo.gender || "";
+
+        // Format the birthday using Moment.js
+        const formattedBirthday = userInfo.birthday
+          ? moment(userInfo.birthday).format("YYYY-MM-DD")
+          : "";
+        document.getElementById("birthday").value = formattedBirthday;
+
+        // Set the profile picture
+        document.getElementById("image").src = userInfo.profilepicture || "";
+        document.getElementById("Contact").value = userInfo.contact || "";
+
+        // Fetch and display country code
+        const email = userInfo.email; // Assuming email is available in userInfo
+        if (email) {
+          fetchCountryCodeFromDatabase(email)
+            .then((countryCode) => {
+              if (countryCode) {
+                document.getElementById("countryCode").value = countryCode;
+
+                // Update intl-tel-input library to reflect selected country
+                const input = document.querySelector("#Contact");
+                const iti = window.intlTelInputGlobals.getInstance(input);
+                iti.setCountry(countryCode); // Set the selected country in the intl-tel-input plugin
+              } else {
+                console.log("Country code not found.");
+                document.getElementById("countryCode").value = "";
+              }
+            })
+            .catch((error) => {
+              console.error("Error fetching country code:", error);
+              document.getElementById("countryCode").value = "";
+            });
+        }
+
+        // Ensure to update the display of tabs after populating data
+        const activeTabIndex = document
+          .querySelector(".tab.active")
+          .getAttribute("data-index");
+        tabs(parseInt(activeTabIndex)); // Refresh tab display based on current active tab
+      }
+
       function displayCompanyInfo() {
-        const email = document.getElementById("email").value; // Assuming email is input by the user
+        const email = document.getElementById("email").value;
         fetchCompanyInfoFromDatabase(email)
           .then((companyInfo) => {
             if (companyInfo) {
-              document.getElementById("orgName").value = companyInfo.orgName;
-              document.getElementById("position").value = companyInfo.position;
-              // Set other fields as needed
-              console.log("Company info fetched:", companyInfo);
+              document.getElementById("orgName").value =
+                companyInfo.orgName || "";
+              document.getElementById("position").value =
+                companyInfo.position || "";
+              // Country code handling in company info
+              document.getElementById("countryCode").value =
+                companyInfo.countryCode || "";
             } else {
               console.log("Company info not found.");
               document.getElementById("orgName").value = "";
               document.getElementById("position").value = "";
-              // Clear other fields or set default values
+              document.getElementById("countryCode").value = "";
             }
           })
           .catch((error) => {
             console.error("Error fetching company info:", error);
             document.getElementById("orgName").value = "";
             document.getElementById("position").value = "";
-            // Handle error scenario or display default values
+            document.getElementById("countryCode").value = "";
           });
       }
 
       function fetchToken() {
-        const email = document.getElementById("email").value; // Assuming email is input by the user
+        const email = document.getElementById("email").value;
         fetchTokenFromDatabase(email)
           .then((token) => {
             if (token) {
@@ -200,11 +266,9 @@
         const input = event.target;
         if (input.files && input.files[0]) {
           const reader = new FileReader();
-
           reader.onload = function (e) {
             document.getElementById("image").src = e.target.result;
           };
-
           reader.readAsDataURL(input.files[0]);
         }
       }
@@ -226,8 +290,7 @@
             tabShow.classList.remove("tabHide");
             tabShow.classList.add("tabShow");
             if (index === 1) {
-              // Check if the selected tab is Company Info
-              displayCompanyInfo(); // Call displayCompanyInfo function to fetch and display company info
+              displayCompanyInfo();
             }
           } else {
             tabShow.classList.remove("tabShow");
@@ -235,6 +298,20 @@
           }
         });
       }
+
+      document.addEventListener("DOMContentLoaded", function () {
+        var input = document.querySelector("#Contact");
+        var iti = window.intlTelInput(input, {
+          separateDialCode: true,
+          initialCountry: "auto",
+          utilsScript: "path/to/intl-tel-input/js/utils.js",
+        });
+
+        input.addEventListener("countrychange", function () {
+          var countryCode = iti.getSelectedCountryData().dialCode;
+          document.getElementById("countryCode").value = countryCode;
+        });
+      });
     </script>
   </body>
 </html>
