@@ -26,17 +26,20 @@ db.connect((err) => {
 });
 
 const createTableQuery = `
- CREATE TABLE IF NOT EXISTS users (
-  id VARCHAR(255) PRIMARY KEY,
-  email VARCHAR(255),
-  name VARCHAR(255),
-  gender VARCHAR(50),
-  birthday DATE,
-  password VARCHAR(255),
-  token VARCHAR(255),
-  orgName VARCHAR(255),
-  position VARCHAR(255)
+CREATE TABLE IF NOT EXISTS users (
+    id VARCHAR(255) PRIMARY KEY,
+    email VARCHAR(255),
+    name VARCHAR(255),
+    gender VARCHAR(50),
+    birthday DATE,
+    password VARCHAR(255),
+    token VARCHAR(255),
+    orgName VARCHAR(255),
+    position VARCHAR(255),
+    countryCode VARCHAR(10),  -- Add countryCode field here
+    contact VARCHAR(20)
 );
+
 `;
 
 db.query(createTableQuery, (err, result) => {
@@ -97,8 +100,17 @@ app.post("/storeAuthInfo", (req, res) => {
 });
 
 app.post("/updateProfile", (req, res) => {
-  const { id, name, email, gender, birthday, password, profilepicture } =
-    req.body;
+  const {
+    id,
+    name,
+    email,
+    gender,
+    birthday,
+    password,
+    profilepicture,
+    countryCode,
+    contact,
+  } = req.body;
 
   const updateQuery = `
     UPDATE users 
@@ -107,13 +119,25 @@ app.post("/updateProfile", (req, res) => {
         gender = ?,
         birthday = ?,
         password = ?,
-        profilepicture = ?
+        profilepicture = ?,
+        countryCode = ?,
+        contact = ?
     WHERE id = ?
   `;
 
   db.query(
     updateQuery,
-    [name, email, gender, birthday, password, profilepicture, id],
+    [
+      name,
+      email,
+      gender,
+      birthday,
+      password,
+      profilepicture,
+      countryCode,
+      contact,
+      id,
+    ],
     (err, result) => {
       if (err) {
         console.error("Error updating profile:", err);
