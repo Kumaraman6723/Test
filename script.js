@@ -10,7 +10,7 @@ function signIn() {
 
   let params = {
     client_id:
-      "tent.com",
+      "174612712651-5rq4a1uco3ftc60t49jvvvpj4l8ikg5m.apps.googleusercontent.com",
     redirect_uri: "http://127.0.0.1:5501/profile.html",
     response_type: "token",
     scope:
@@ -232,6 +232,19 @@ function signOut() {
       window.location.href = "http://127.0.0.1:5501/signup.html";
     });
 }
+document.addEventListener("DOMContentLoaded", function () {
+  var input = document.querySelector("#Contact");
+  var iti = window.intlTelInput(input, {
+    separateDialCode: true,
+    initialCountry: "auto",
+    utilsScript: "path/to/intl-tel-input/js/utils.js",
+  });
+
+  input.addEventListener("countrychange", function () {
+    var countryCode = iti.getSelectedCountryData().dialCode;
+    document.getElementById("countryCode").value = countryCode;
+  });
+});
 
 // Function to update user profile
 function updateProfile() {
@@ -250,7 +263,9 @@ function updateProfile() {
     email: document.getElementById("email").value,
     gender: document.getElementById("gender").value,
     birthday: document.getElementById("birthday").value, // Use directly if already in YYYY-MM-DD format
-    password: document.getElementById("password").value, // Assuming you have an input with id="password"
+    password: document.getElementById("password").value,
+    contact: document.getElementById("Contact").value,
+    countryCode: document.getElementById("countryCode").value, // Country code from hidden input
     profilepicture: document.getElementById("image").src, // Profile picture URL
   };
 
@@ -290,8 +305,12 @@ function displayUserInfo(userInfo) {
   document.getElementById("birthday").value = formattedBirthday;
 
   // Set the profile picture
-  document.getElementById("image").src = userInfo.profilepicture; // Replace 'profilepicture' with the actual key from userInfo
-  console.log(userEmail);
+  document.getElementById("image").src = userInfo.profilepicture;
+  document.getElementById("Contact").value = userInfo.contact;
+  document.getElementById("countryCode").value = userInfo.countryCode || "";
+
+  // Replace 'profilepicture' with the actual key from userInfo
+  console.log(userInfo.countryCode);
 }
 
 // Function to generate token using Spring Boot API
