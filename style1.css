@@ -1,0 +1,102 @@
+/* General Styles */
+body {
+  font-family: Arial, sans-serif;
+  background-color: #f8f9fa;
+  margin: 0;
+  padding: 0;
+}
+
+/* Header Styles */
+header {
+  background-color: #343a40;
+  padding: 1rem;
+  border-bottom: 2px solid #6c757d;
+}
+
+header .container {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+}
+
+header .nav-link {
+  color: #fff !important;
+  padding: 0.5rem 1rem;
+  transition: color 0.3s ease;
+}
+
+header .nav-link:hover {
+  color: #adb5bd !important;
+}
+
+header .form-control {
+  border: 1px solid #6c757d;
+  padding: 0.5rem;
+}
+
+header .dropdown-toggle::after {
+  margin-left: 0.5rem;
+}
+
+header .dropdown-menu {
+  background-color: #343a40;
+  border: 1px solid #6c757d;
+}
+
+header .dropdown-item {
+  color: #fff;
+  transition: background-color 0.3s ease, color 0.3s ease;
+}
+
+header .dropdown-item:hover,
+header .dropdown-item:focus {
+  background-color: #495057;
+  color: #fff;
+}
+
+header .dropdown-divider {
+  border-top: 1px solid #6c757d;
+}
+
+/* Container Styles */
+.container {
+  padding: 2rem;
+  background-color: #fff;
+  border-radius: 8px;
+  box-shadow: 0 2px 4px rgba(0, 0, 0, 0.1);
+}
+
+/* Welcome Message Styles */
+h1 {
+  font-size: 2rem;
+  color: #343a40;
+  margin-bottom: 1rem;
+}
+
+/* Profile Details Styles */
+#user-profile {
+  background-color: #e9ecef;
+  padding: 1rem;
+  border-radius: 8px;
+}
+
+/* Responsive Styles */
+@media (max-width: 768px) {
+  header .container {
+    flex-direction: column;
+  }
+
+  header .nav {
+    justify-content: center;
+    margin-bottom: 1rem;
+  }
+
+  header .form-control {
+    width: 100%;
+    margin-bottom: 1rem;
+  }
+
+  header .dropdown {
+    text-align: center;
+  }
+}
