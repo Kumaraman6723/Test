@@ -1,6 +1,6 @@
 // Global variable to store user email
 let userEmail = "";
-
+let userProfilePicture = "";
 // Function to initiate Google Sign-In
 function signIn() {
   let oauth2Endpoint = "https://accounts.google.com/o/oauth2/v2/auth";
@@ -11,7 +11,7 @@ function signIn() {
   let params = {
     client_id:
       "174612712651-5rq4a1uco3ftc60t49jvvvpj4l8ikg5m.apps.googleusercontent.com",
-    redirect_uri: "http://127.0.0.1:5501/profile.html",
+    redirect_uri: "http://127.0.0.1:5501/dashboard.html",
     response_type: "token",
     scope:
       "https://www.googleapis.com/auth/userinfo.profile https://www.googleapis.com/auth/userinfo.email https://www.googleapis.com/auth/user.birthday.read https://www.googleapis.com/auth/user.gender.read",
@@ -122,6 +122,7 @@ function fetchUserInfo(token) {
       console.log("User info fetched:", userInfo);
       // Set global variable
       userEmail = userInfo.email;
+      userProfilePicture = userInfo.picture;
       fetchAdditionalUserInfo(token, userInfo);
     })
     .catch((error) => {
@@ -186,6 +187,8 @@ function initGoogleAuth() {
       });
   });
 }
+// Assuming you have the imageURL fetched from your database or API
+// Replace with actual image URL
 
 // Function to sign out user and revoke token
 function signOut() {
@@ -305,13 +308,19 @@ function displayUserInfo(userInfo) {
   document.getElementById("birthday").value = formattedBirthday;
 
   // Set the profile picture
+
   document.getElementById("image").src = userInfo.profilepicture;
+  userProfilePicture = userInfo.profilepicture;
   document.getElementById("Contact").value = userInfo.contact;
   document.getElementById("countryCode").value = userInfo.countryCode || "";
 
   // Replace 'profilepicture' with the actual key from userInfo
   console.log(userInfo.countryCode);
 }
+document.addEventListener("DOMContentLoaded", function () {
+  // Your code here, including accessing and setting 'image' element properties
+  document.getElementById("user-profile-picture").src = userProfilePicture;
+});
 
 // Function to generate token using Spring Boot API
 async function generateToken() {
@@ -505,3 +514,107 @@ window.onload = function () {
     console.error("No authentication information found.");
   }
 };
+const sideLinks = document.querySelectorAll(
+  ".sidebar .side-menu li a:not(.logout)"
+);
+
+sideLinks.forEach((item) => {
+  const li = item.parentElement;
+  item.addEventListener("click", () => {
+    sideLinks.forEach((i) => {
+      i.parentElement.classList.remove("active");
+    });
+    li.classList.add("active");
+  });
+});
+
+const menuBar = document.querySelector(".content nav .bx.bx-menu");
+const sideBar = document.querySelector(".sidebar");
+
+menuBar.addEventListener("click", () => {
+  sideBar.classList.toggle("close");
+});
+
+const searchBtn = document.querySelector(
+  ".content nav form .form-input button"
+);
+const searchBtnIcon = document.querySelector(
+  ".content nav form .form-input button .bx"
+);
+const searchForm = document.querySelector(".content nav form");
+
+searchBtn.addEventListener("click", function (e) {
+  if (window.innerWidth < 576) {
+    e.preventDefault;
+    searchForm.classList.toggle("show");
+    if (searchForm.classList.contains("show")) {
+      searchBtnIcon.classList.replace("bx-search", "bx-x");
+    } else {
+      searchBtnIcon.classList.replace("bx-x", "bx-search");
+    }
+  }
+});
+
+window.addEventListener("resize", () => {
+  if (window.innerWidth < 768) {
+    sideBar.classList.add("close");
+  } else {
+    sideBar.classList.remove("close");
+  }
+  if (window.innerWidth > 576) {
+    searchBtnIcon.classList.replace("bx-x", "bx-search");
+    searchForm.classList.remove("show");
+  }
+});
+
+const toggler = document.getElementById("theme-toggle");
+
+toggler.addEventListener("change", function () {
+  if (this.checked) {
+    document.body.classList.add("dark");
+  } else {
+    document.body.classList.remove("dark");
+  }
+});
+function showContent(sectionId) {
+  // Hide all content sections
+  document.querySelectorAll(".content-section").forEach(function (section) {
+    section.style.display = "none";
+  });
+
+  // Show the selected content section
+  document.getElementById(sectionId).style.display = "block";
+}
+
+// Add event listeners to sidebar links
+document
+  .getElementById("dashboard-link")
+  .addEventListener("click", function () {
+    showContent("dashboard-content");
+  });
+document.getElementById("shop-link").addEventListener("click", function () {
+  showContent("shop-content");
+});
+document
+  .getElementById("analytics-link")
+  .addEventListener("click", function () {
+    showContent("analytics-content");
+  });
+document.getElementById("tickets-link").addEventListener("click", function () {
+  showContent("tickets-content");
+});
+document.getElementById("users-link").addEventListener("click", function () {
+  showContent("users-content");
+});
+document.getElementById("settings-link").addEventListener("click", function () {
+  showContent("settings-content");
+});
+
+// Default content to show on page load
+showContent("dashboard-content");
+
+document.getElementById("clickable-div").addEventListener("click", function () {
+  const displayTextDiv = document.getElementById("display-text");
+  displayTextDiv.style.display = "block";
+  displayTextDiv.innerHTML = "<p>You clicked on the left-side div!</p>";
+});
