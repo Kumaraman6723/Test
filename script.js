@@ -610,109 +610,110 @@ document.getElementById("settings-link").addEventListener("click", function () {
 
 // Default content to show on page load
 showContent("dashboard-content");
-
 document.getElementById("clickable-div").addEventListener("click", function () {
   const displayTextDiv = document.getElementById("display-text");
   displayTextDiv.style.display = "block";
   displayTextDiv.innerHTML = "<p>You clicked on the left-side div!</p>";
 });
+
 document.addEventListener("DOMContentLoaded", function () {
-  // Sample data for charts
-  const chartData = {
-    labels: ["January", "February", "March", "April", "May", "June"],
-    datasets: [
-      {
-        label: "Dataset 1",
-        backgroundColor: "rgba(255, 99, 132, 0.2)",
-        borderColor: "rgba(255, 99, 132, 1)",
-        data: [10, 20, 30, 40, 50, 60],
-      },
-    ],
-  };
+  var xmlhttp = new XMLHttpRequest();
+  var url = "http://127.0.0.1:5500/jsonData.json";
+  xmlhttp.open("GET", url, true);
+  xmlhttp.send();
+  xmlhttp.onreadystatechange = function () {
+    if (this.readyState == 4 && this.status == 200) {
+      var data = JSON.parse(this.responseText);
 
-  // Create Bar Chart
-  const barChartCtx = document.getElementById("barChart").getContext("2d");
-  new Chart(barChartCtx, {
-    type: "bar",
-    data: chartData,
-    options: {
-      responsive: true,
-      scales: {
-        x: {
-          beginAtZero: true,
-        },
-        y: {
-          beginAtZero: true,
-        },
-      },
-    },
-  });
-
-  // Create Line Chart
-  const lineChartCtx = document.getElementById("lineChart").getContext("2d");
-  new Chart(lineChartCtx, {
-    type: "line",
-    data: chartData,
-    options: {
-      responsive: true,
-      scales: {
-        x: {
-          beginAtZero: true,
-        },
-        y: {
-          beginAtZero: true,
-        },
-      },
-    },
-  });
-
-  // Sample data for pie chart
-  const pieChartData = {
-    labels: ["Red", "Blue", "Yellow"],
-    datasets: [
-      {
-        label: "Dataset 1",
-        backgroundColor: [
-          "rgba(255, 99, 132, 0.2)",
-          "rgba(54, 162, 235, 0.2)",
-          "rgba(255, 206, 86, 0.2)",
-        ],
-        borderColor: [
-          "rgba(255, 99, 132, 1)",
-          "rgba(54, 162, 235, 1)",
-          "rgba(255, 206, 86, 1)",
-        ],
-        data: [10, 20, 30],
-      },
-    ],
-  };
-
-  // Create Pie Chart
-  const pieChartCtx = document.getElementById("pieChart").getContext("2d");
-  new Chart(pieChartCtx, {
-    type: "pie",
-    data: pieChartData,
-    options: {
-      responsive: true,
-    },
-  });
-
-  // Navigation logic
-  const sections = {
-    "dashboard-link": "dashboard-content",
-    "shop-link": "shop-content",
-    "analytics-link": "analytics-content",
-    "tickets-link": "tickets-content",
-    "settings-link": "settings-content",
-  };
-
-  document.querySelectorAll(".side-menu a").forEach((link) => {
-    link.addEventListener("click", function (e) {
-      e.preventDefault();
-      document.querySelectorAll(".content-section").forEach((section) => {
-        section.style.display = "none";
+      // Process chart data from JSON
+      var chartLabels = data.chartData.labels;
+      var chartData = data.chartData.datasets.map(function (dataset) {
+        return {
+          label: dataset.label,
+          backgroundColor: dataset.backgroundColor,
+          borderColor: dataset.borderColor,
+          data: dataset.data,
+        };
       });
-      document.getElementById(sections[this.id]).style.display = "block";
-    });
-  });
+
+      // Create Bar Chart
+      const barChartCtx = document.getElementById("barChart").getContext("2d");
+      new Chart(barChartCtx, {
+        type: "bar",
+        data: {
+          labels: chartLabels,
+          datasets: chartData,
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              beginAtZero: true,
+            },
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+
+      // Create Line Chart
+      const lineChartCtx = document
+        .getElementById("lineChart")
+        .getContext("2d");
+      new Chart(lineChartCtx, {
+        type: "line",
+        data: {
+          labels: chartLabels,
+          datasets: chartData,
+        },
+        options: {
+          responsive: true,
+          scales: {
+            x: {
+              beginAtZero: true,
+            },
+            y: {
+              beginAtZero: true,
+            },
+          },
+        },
+      });
+
+      // Sample data for pie chart
+      var pieChartData = data.pieChartData;
+
+      // Create Pie Chart
+      const pieChartCtx = document.getElementById("pieChart").getContext("2d");
+      new Chart(pieChartCtx, {
+        type: "pie",
+        data: {
+          labels: pieChartData.labels,
+          datasets: pieChartData.datasets,
+        },
+        options: {
+          responsive: true,
+        },
+      });
+
+      // Navigation logic
+      const sections = {
+        "dashboard-link": "dashboard-content",
+        "shop-link": "shop-content",
+        "analytics-link": "analytics-content",
+        "tickets-link": "tickets-content",
+        "settings-link": "settings-content",
+      };
+
+      document.querySelectorAll(".side-menu a").forEach((link) => {
+        link.addEventListener("click", function (e) {
+          e.preventDefault();
+          document.querySelectorAll(".content-section").forEach((section) => {
+            section.style.display = "none";
+          });
+          document.getElementById(sections[this.id]).style.display = "block";
+        });
+      });
+    }
+  };
 });
